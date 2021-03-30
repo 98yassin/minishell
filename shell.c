@@ -12,20 +12,35 @@
 
 #include "minishell.h"
 
+void    prompt()
+{
+    ft_putstr_fd("\e[1;32mMy_Minishell $>\e[0m", 0);
+}
 
 int     main()
 {
-    t_var var;
+    t_list *var;
+    char *line;
     int r;
+
+    var = NULL;
+    line = NULL;
     while (1)
     {
-        ft_putstr_fd("\e[1;32mMy_Minishell $>\e[0m", 0);
-        r = get_next_line(0, &var.line);
-        ft_putstr_fd(var.line, 0);
-		write(1, "\n",1);
-        if (ft_strcmp((const char*)var.line,"exit") == 0)
+        prompt();
+        r = get_next_line(0, line);
+        if (r > 0)
         {
-            free(var.line);
+            ft_putstr_fd(line, 0);
+		    write(1, "\n",1);
+
+        }
+
+        var = ft_lexer(line);
+
+        if (ft_strcmp((const char*)line,"exit") == 0)
+        {
+            free(line);
             break;
         }
     }

@@ -30,10 +30,32 @@
 #define PURPLE "\e[1;35m"
 #define BLUE "\e[1;34m"
 
-typedef struct var_minishell
-{
-    char *line;
-}               t_var;
+#define NONE "NONE"
+#define PIPE "PIPE"
+#define SEMICOLON "SEMICOLON"
+#define REDIR_GREATER "REDIR_GREATER"
+#define REDIR_LESSER "REDIR_LESSER"
+#define WORD "WORD"
 
+
+
+typedef struct s_minishell
+{
+    //int index;
+    char *type;
+    char *value;
+    struct s_minishell *next;
+    
+}               t_list;
+
+
+typedef struct quote
+{
+    char *Double_Quote;
+    char *Single_Quote;
+}               s_quote;
+
+
+t_list        *ft_lexer(char *line);
 
 #endif
