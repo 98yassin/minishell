@@ -35,6 +35,7 @@
 #define SEMICOLON "SEMICOLON"
 #define REDIR_GREATER "REDIR_GREATER"
 #define REDIR_LESSER "REDIR_LESSER"
+#define DOUBLE_GREATER "DOUBLE_GREATER"
 #define WORD "WORD"
 
 
@@ -46,16 +47,16 @@ typedef struct s_minishell
     char *value;
     struct s_minishell *next;
     
-}               t_list;
+}               t_token_list;
 
 
-typedef struct quote
+typedef struct s_struct
 {
-    char *Double_Quote;
-    char *Single_Quote;
-}               s_quote;
+    int i;
+}               t_str;
 
 
-t_list        *ft_lexer(char *line);
+t_token_list        *ft_lexer(char *line);
+void                display_token(t_token_list *var);
 
 #endif

@@ -12,9 +12,11 @@
 
 #include "minishell.h"
 
-t_list        *initialize_list()
+t_token_list        *initialize_list()
 {
-    t_list *first_token;
+    t_token_list *first_token;
+    first_token = malloc(sizeof(t_token_list));
+    //first_token = NULL;
     //first_token->index = 0;
     first_token->type = NONE;
     first_token->value = NONE;
@@ -22,24 +24,48 @@ t_list        *initialize_list()
     return (first_token);
 }
 
-void        add_token(t_list *var,char *type,char *value)
+void        add_token(t_token_list *var,char *type,char *value)
 {
-    t_list *new_token;
+    t_token_list *new_token;
 
     new_token = var;
     while (new_token->next != NULL)
         new_token = new_token->next;
+    new_token->next = malloc(sizeof(t_token_list));
     new_token->next->type = type;
     new_token->next->value = value;
+    new_token->next->next = NULL;
     
 }
-void        get_symbole(t_list *var, char *line, int i)
+
+void        display_token(t_token_list *var)
+{
+    while (var != NULL)
+    {
+        write(1,YELLOW,ft_strlen(YELLOW));
+        write(1,"{",1);
+        ft_putstr_fd(var->value,1);
+        write(1,"}",1);
+        ft_putstr_fd("type :",1);
+        ft_putstr_fd(var->type,1);
+        write(1,"\n",1);
+        var = var->next;
+    }
+}
+
+void        get_symbole(t_token_list *var, char *line, t_str *index)
 {
     char *token;
+    int i;
+
+    i = index->i;
     if (line[i] == '|')
     {
         if (line[i + 1] == '|')
+        {
             token = ft_strdup("||");
+            i++;
+        }
         else
             token = strdup("|");
         add_token(var,PIPE,token);
@@ -47,7 +73,10 @@ void        get_symbole(t_list *var, char *line, int i)
     if (line[i] == ';')
     {
         if (line[i + 1] == ';')
+        {
             token = ft_strdup(";;");
+            i++;
+        }
         else 
             token = ft_strdup(";");
         add_token(var, SEMICOLON, token);
@@ -55,85 +84,110 @@ void        get_symbole(t_list *var, char *line, int i)
     if (line[i] == '>')
     {
         if (line[i + 1] == '>')
+        {
             token = ft_strdup(">>");
+            add_token (var, DOUBLE_GREATER, token);
+            i++;
+        }
         else
+        {
             token = ft_strdup(">");
-        add_token (var, REDIR_GREATER, token);
+            add_token (var, REDIR_GREATER, token);
+        }
     }
     if (line[i] == '<')
     {
         if (line[i + 1] == '<')
+        {
             token = ft_strdup("<<");
+            i++;
+        }
         else
             token = ft_strdup("<");
         add_token (var, REDIR_LESSER, token);
     }
-    
+    index->i = i;
 }
 
-int        get_word(t_list *var, s_quote *qot, char *line, int i)
+char        *Treat_Quotes(t_str *index, char *line)
 {
-    char *token;
-    //char *Double_Quote;
-    //char *Single_Quote;
+    char *Double_Quote;
+    char *Single_Quote;
 
     int j;
-    int l = 0;
-    if (line[i] == '"')
+    if (line[index->i] == '"')
     {
-        j = i; 
+        j = index->i; 
         j++;
         while (line[j] != '\0' && line[j] != '"')
             j++;
-        qot->Double_Quote = ft_substr(line,i,(j - i));
-        return (j);
+        Double_Quote = ft_substr(line,index->i,(j - index->i + 1));
+        index->i = j;
+        return (Double_Quote);
     }
-    else if (line[i] == '\'')
+    else if (line[index->i] == '\'')
     {
-        j = i;
+        j = index->i;
         j++;
         while (line[j] != '\0' && line[j] != '\'')
             j++;
-        qot->Single_Quote = ft_substr(line,i,(j - i));
-        return(j);
+        Single_Quote = ft_substr(line,index->i,(j - index->i + 1));
+        index->i = j;
+        return(Single_Quote);
     }
-    // while ((line[i] != '\0') && (ft_strchr("|;> <",line[i]) == NULL))
-    // {
-    //     token[l] = line[i];
-    //     l++;
-    //     i++;
-    // }
-    return (i);
+    return (NULL);
 }
 
-t_list      *ft_lexer(char *line)
+t_token_list      *ft_lexer(char *line)
 {
-    t_list *var;
-    s_quote *qot;
-    char *token;
-    int i;
-    int j;
-    
-    i = 0;
-    j = 0;
+    t_token_list *var;
+    t_str index;
+    char *token; 
+    char *str;
+    //int backslash = 0;
+    // while (line[i] != '\0')
+    // {
+    //     if (line[i] == '"' && backslash == 0)
+    //         treat_double_quotes();
+    //     if (line[i] == '\\' && backslash == 0)
+    //         backslash = 1;
+    //     else
+    //         backslash = 0;
+    //     i++;
+    // }
+    token = ft_strdup("");
+    index.i = 0;
+    var = NULL;
     var = initialize_list();
-    while (line[i])
+    while (line[index.i])
     {
-        while (line[i] == ' ')
-            i++;
-        if (line[i] == '|' || line[i] == ';' || line[i] == '>' || line[i] == '<')
-            get_symbole(var,line,i++);
-        while ((line[i] != '\0') && (ft_strchr("|;> <",line[i] == NULL)))
+        while (line[index.i] == ' ' || line[index.i] == '\t')
+            index.i++;
+        if (line[index.i] == '|' || line[index.i] == ';' || line[index.i] == '>' || line[index.i] == '<')
         {
-            if (line[i] == '"' || line[i] == '\'')
-            {
-                i = get_word(var, qot, line, i);
-               // token = ft_strjoin(token, )
-            }else
-                token[j++] = line[i];
-            i++;
-        }
+            get_symbole(var,line,&index);
+            index.i++;
 
+        }
+        while ((line[index.i] != '\0') && (ft_strchr("|;> <\t",line[index.i]) == NULL))
+        {
+            if (line[index.i] == '"' || line[index.i] == '\'')
+            {
+                //index->i = get_word(var, index, line);
+                token = ft_strjoin(token, Treat_Quotes(&index, line));
+            }else
+            {
+                str = ft_strjoin(token, ft_substr(line, index.i, 1));
+                free(token);
+                token = str;
+            }
+            index.i++;
+        }
+        if ( ft_strcmp(token, "") != 0)
+        {
+            add_token(var, WORD, token);
+            token = ft_strdup("");
+        }
     }
     return (var);
 }

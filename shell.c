@@ -19,7 +19,7 @@ void    prompt()
 
 int     main()
 {
-    t_list *var;
+    t_token_list *var;
     char *line;
     int r;
 
@@ -28,15 +28,14 @@ int     main()
     while (1)
     {
         prompt();
-        r = get_next_line(0, line);
+        r = get_next_line(0, &line);
         if (r > 0)
         {
-            ft_putstr_fd(line, 0);
+           // ft_putstr_fd(line, 0);
 		    write(1, "\n",1);
-
         }
-
         var = ft_lexer(line);
+        display_token(var);
 
         if (ft_strcmp((const char*)line,"exit") == 0)
         {
