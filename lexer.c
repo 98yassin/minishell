@@ -115,13 +115,31 @@ char        *Treat_Quotes(t_str *index, char *line)
     char *Double_Quote;
     char *Single_Quote;
 
+    int backslash;
     int j;
     if (line[index->i] == '"')
     {
         j = index->i; 
         j++;
         while (line[j] != '\0' && line[j] != '"')
+        {
+            if (line[j] == '\\')
+            {
+                backslash = check_backslash(line, j);
+                if (backslash % 2 != 0)
+                {
+                    //Double_Quote = ft_strjoin(Double_Quote, ft_substr(line, j, backslash + 1));
+                    j = j + backslash;
+                    backslash = 0;
+                }else
+                {
+                    j = j + backslash - 1;
+                    backslash = 0;
+                }
+
+            }
             j++;
+        }
         Double_Quote = ft_substr(line,index->i,(j - index->i + 1));
         index->i = j;
         return (Double_Quote);
@@ -131,7 +149,24 @@ char        *Treat_Quotes(t_str *index, char *line)
         j = index->i;
         j++;
         while (line[j] != '\0' && line[j] != '\'')
+        {
+            if (line[j] == '\\')
+            {
+                backslash = check_backslash(line, j);
+                if (backslash % 2 != 0)
+                {
+                    //Double_Quote = ft_strjoin(Double_Quote, ft_substr(line, j, backslash + 1));
+                    j = j + backslash;
+                    backslash = 0;
+                }else
+                {
+                    j = j + backslash - 1;
+                    backslash = 0;
+                }
+
+            }
             j++;
+        }
         Single_Quote = ft_substr(line,index->i,(j - index->i + 1));
         index->i = j;
         return(Single_Quote);

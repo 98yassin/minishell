@@ -60,5 +60,6 @@ typedef struct s_struct
 
 t_token_list        *ft_lexer(char *line);
 void                display_token(t_token_list *var);
+int                 check_backslash(char *line, int i);
 
 #endif
