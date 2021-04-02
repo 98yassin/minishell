@@ -14,7 +14,7 @@
 
 void    prompt()
 {
-    ft_putstr_fd("\e[1;32mMy_Minishell $>\e[0m", 0);
+    ft_putstr_fd("\033[0;36mMy_Minishell $>\e[0m", 0);
 }
 
 int     main()

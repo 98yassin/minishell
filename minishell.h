@@ -29,6 +29,8 @@
 #define YELLOW "\e[1;33m"
 #define PURPLE "\e[1;35m"
 #define BLUE "\e[1;34m"
+#define Purple "\033[0;35m"
+#define Cyan "\033[0;36m"
 
 #define NONE "NONE"
 #define PIPE "PIPE"
