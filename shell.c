@@ -12,17 +12,8 @@
 
 #include "minishell.h"
 
-void    prompt()
+void    banner()
 {
-   
-    ft_putstr_fd("\033[0;36mMy_Minishell $>\e[0m", 0);
-}
-
-int     main()
-{
-    t_token_list *var;
-    char *line;
-    int r;
     ft_putstr_fd("\e[1;32m ██████   ██████ █████ ██████   █████ █████  █████████  █████   █████ ██████████ █████       █████      \e[0m\n",1);
     ft_putstr_fd("\e[1;32m░░██████ ██████ ░░███ ░░██████ ░░███ ░░███  ███░░░░░███░░███   ░░███ ░░███░░░░░█░░███       ░░███       \e[0m\n",1);
     ft_putstr_fd("\e[1;32m ░███░█████░███  ░███  ░███░███ ░███  ░███ ░███    ░░░  ░███    ░███  ░███  █ ░  ░███        ░███       \e[0m\n",1);
@@ -31,8 +22,23 @@ int     main()
     ft_putstr_fd("\e[1;32m ░███      ░███  ░███  ░███  ░░█████  ░███  ███    ░███ ░███    ░███  ░███ ░   █ ░███      █ ░███      █\e[0m\n",1);
     ft_putstr_fd("\e[1;32m █████     █████ █████ █████  ░░█████ █████░░█████████  █████   █████ ██████████ ███████████ ███████████\e[0m\n",1);
     ft_putstr_fd("\e[1;32m░░░░░     ░░░░░ ░░░░░ ░░░░░    ░░░░░ ░░░░░  ░░░░░░░░░  ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░░ ░░░░░░░░░░░ \e[0m\n",1);
+}
+
+void    prompt()
+{
+   
+    ft_putstr_fd("\033[0;36mMy_Minishell $>\e[0m", 0);
+}
+// int ac ,char **av, char **env
+int     main()
+{
+    t_token_list *var;
+    char *line;
+    int r;
+
     var = NULL;
     line = NULL;
+    banner();
     while (1)
     {
         prompt();
@@ -44,6 +50,7 @@ int     main()
         }
         var = ft_lexer(line);
         display_token(var);
+        check_syntax_error(var);
 
         if (ft_strcmp((const char*)line,"exit") == 0)
         {

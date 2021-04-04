@@ -19,7 +19,7 @@ t_token_list        *initialize_list()
     //first_token = NULL;
     //first_token->index = 0;
     first_token->type = NONE;
-    first_token->value = NONE;
+    first_token->value = ft_strdup("NONE");
     first_token->next = NULL;
     return (first_token);
 }
@@ -253,36 +253,6 @@ t_token_list      *ft_lexer(char *line)
             token = ft_strdup("");
         }
     }
+    add_token(var, NEWLINE, ft_strdup("NEWLINE"));
     return (var);
 }
-
-
-
-
-// int         check_backslash(char line, int *i)
-// {
-//     char *token;
-//     int backslash;
-//     int j;
-
-//     backslash = 0;
-//     j = i;
-//     while (line[i++] == '\\')
-//     {
-//         backslash++;
-//     }
-//     if (backslash % 2 != 0)
-//     {
-//         token = ft_substr(line, j, backslash + 1);
-//         //index.i = index.i + backslash;
-//         backslash = 0;
-//     }else
-//     {
-//         token = ft_substr(line, j, backslash);
-//         //index.i = index.i + backslash;
-//         backslash = 0;
-//     }
-//     index.i = i;
-//     return(backslash);
-
-// }

@@ -2,7 +2,7 @@ NAME = minishell
 
 CFLAGS = -Wall -Wextra -Werror
 
-src = shell.c get_next_line.c lexer.c
+src = shell.c get_next_line.c lexer.c expanding.c
 
 libft = ./libft/libft.a
 

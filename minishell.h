@@ -39,6 +39,7 @@
 #define REDIR_LESSER "REDIR_LESSER"
 #define DOUBLE_GREATER "DOUBLE_GREATER"
 #define WORD "WORD"
+#define NEWLINE "NEWLINE"
 
 
 
@@ -61,5 +62,6 @@ typedef struct s_struct
 t_token_list        *ft_lexer(char *line);
 void                display_token(t_token_list *var);
 int                 check_backslash(char *line, int i);
+void                check_syntax_error(t_token_list *token_lst);
 
 #endif
