@@ -42,7 +42,6 @@
 #define NEWLINE "NEWLINE"
 
 
-
 typedef struct s_minishell
 {
     //int index;
@@ -59,9 +58,29 @@ typedef struct s_struct
 }               t_str;
 
 
+typedef struct s_redirection //list of redirections and types
+{
+    char *type;
+    char *file;
+    struct s_redirection *next;
+    
+}               t_redirection;
+
+typedef struct s_command //list of commands
+{
+    char **command;
+    t_redirection *redirection;
+    struct s_command *next;
+
+}               t_command;
+
+
 t_token_list        *ft_lexer(char *line);
 void                display_token(t_token_list *var);
 int                 check_backslash(char *line, int i);
 void                check_syntax_error(t_token_list *token_lst);
+
+
+t_command       *parce(t_token_list *token_list);
 
 #endif

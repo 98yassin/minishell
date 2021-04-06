@@ -33,6 +33,7 @@ void    prompt()
 int     main()
 {
     t_token_list *var;
+    t_command *cmd;
     char *line;
     int r;
 
@@ -51,6 +52,7 @@ int     main()
         var = ft_lexer(line);
         display_token(var);
         check_syntax_error(var);
+        cmd = parce(var);
 
         if (ft_strcmp((const char*)line,"exit") == 0)
         {
