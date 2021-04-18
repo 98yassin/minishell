@@ -51,12 +51,18 @@ typedef struct s_minishell
     
 }               t_token_list;
 
+typedef struct s_env
+{
+    char *name;
+    char *value;
+    struct s_env *next;
+}               t_env;
+
 
 typedef struct s_struct
 {
     int i;
 }               t_str;
-
 
 typedef struct s_redirection //list of redirections and types
 {
@@ -66,10 +72,14 @@ typedef struct s_redirection //list of redirections and types
     
 }               t_redirection;
 
+typedef enum e_type {e_pipe, e_semicolon, e_newline} t_type;
+
 typedef struct s_command //list of commands
 {
     char **command;
     t_redirection *redirection;
+    t_type seperator;
+
     struct s_command *next;
 
 }               t_command;
@@ -78,9 +88,13 @@ typedef struct s_command //list of commands
 t_token_list        *ft_lexer(char *line);
 void                display_token(t_token_list *var);
 int                 check_backslash(char *line, int i);
-void                check_syntax_error(t_token_list *token_lst);
+int                 check_syntax_error(t_token_list *token_lst);
+void                display_commands(t_command *cmd);
+void                expanding(t_command *cmd, t_env *env_lst);
+t_env               *create_env_list(t_env *lenv, char **env);
+void                take_dollar_name(char *comd, int *k, t_env *envl);
 
+t_command           *ft_parce(t_token_list *token_list);
 
-t_command       *parce(t_token_list *token_list);
 
 #endif

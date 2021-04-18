@@ -29,17 +29,41 @@ void    prompt()
    
     ft_putstr_fd("\033[0;36mMy_Minishell $>\e[0m", 0);
 }
+
+// void    exec()
+// {
+//     while (curr_cmd)
+//     {
+//         expanding();
+//         if (curr_cmd->sp == pipe)
+//         {
+
+//         }
+//         else
+//         {
+            
+//         }
+        
+//     }
+// }
+
 // int ac ,char **av, char **env
-int     main()
+int     main(int argc, char **argv, char **env)
 {
     t_token_list *var;
-    t_command *cmd;
+    t_command *cmd = NULL;
+    t_env *lenv;
     char *line;
     int r;
+    int syntax_rslt;
 
+    (void)argc;
+    (void)argv;
     var = NULL;
     line = NULL;
+    lenv = NULL;
     banner();
+    lenv = create_env_list(lenv, env);
     while (1)
     {
         prompt();
@@ -51,8 +75,15 @@ int     main()
         }
         var = ft_lexer(line);
         display_token(var);
-        check_syntax_error(var);
-        cmd = parce(var);
+        syntax_rslt = check_syntax_error(var);
+        if (syntax_rslt != 1)
+        {
+            cmd = ft_parce(var);
+            //expanding();
+            expanding(cmd, lenv);
+            //exec();
+            display_commands(cmd);
+        }
 
         if (ft_strcmp((const char*)line,"exit") == 0)
         {
