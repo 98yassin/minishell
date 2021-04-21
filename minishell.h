@@ -92,7 +92,8 @@ int                 check_syntax_error(t_token_list *token_lst);
 void                display_commands(t_command *cmd);
 void                expanding(t_command *cmd, t_env *env_lst);
 t_env               *create_env_list(t_env *lenv, char **env);
-void                take_dollar_name(char *comd, int *k, t_env *envl);
+//void                take_dollar_name(char *comd, int *k, t_env *envl);
+char            *take_dollar_name(char *comd, int *k, t_env *envl);
 
 t_command           *ft_parce(t_token_list *token_list);
 

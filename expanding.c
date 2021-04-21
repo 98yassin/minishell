@@ -33,7 +33,7 @@ void    ft_new_str(char *str, int index)
     }
 }
 
-int        expand_double_quotes(char *str, int index, t_env *env_list)
+int        expand_double_quotes(char **str, int index, t_env *env_list)
 {
     //index++;
     // if (str[index] == '"')
@@ -43,22 +43,24 @@ int        expand_double_quotes(char *str, int index, t_env *env_list)
     // }
     // else 
     // {
-        while (str[index] != '\0')
+        
+        while ((*str)[index] != '\0')
         {
             //index++;
-            if (str[index] == '\\')
+            if ((*str)[index] == '\\')
             {
-                if (ft_strchr("\\`$\"",str[index + 1]) != NULL)
+                if (ft_strchr("\\`$\"",(*str)[index + 1]) != NULL)
                 {
-                    ft_new_str(str, index);
-                    //j++;
+                    ft_new_str((*str), index);
                 }
+                //else if (str[index + 1] == '$')
+                   // ft_new_str(str, index--);
             }
-            if (str[index] == '$' && (ft_strchr("\" \t", str[index + 1]) == NULL))
-                take_dollar_name(str, &index, env_list);
-            else if (str[index] == '"')
+            else if ((*str)[index] == '$' && (ft_strchr("\" \t", (*str)[index + 1]) == NULL))
+                (*str) = take_dollar_name((*str), &index, env_list);
+            else if ((*str)[index] == '"')
             {
-                ft_new_str(str, index);
+                ft_new_str((*str), index);
                 index--;
                 break;
             }
@@ -99,7 +101,7 @@ char            *get_dollar_name(char *command,int *j)
     i = *j;
     name = ft_strdup("");
         
-    while (command[i] != '\0' && ft_strchr("\\ `$\"",command[i]) == NULL)
+    while (command[i] != '\0' && ft_strchr("\\' `$\":/",command[i]) == NULL)
     {
         name = ft_strjoin(name, ft_substr(command, i, 1));
         i++;
@@ -122,59 +124,80 @@ char            *after_dollar_value(char *command1, int i)
     return (after_dollar);
 }
 
-void            take_dollar_name(char *comd, int *k, t_env *envl)
+// char *ft_strcpy(char *dest, char *src)
+// {
+// 	int i;
+
+// 	i = 0;
+// 	while (src[i] != '\0')
+// 	{
+// 		dest[i] = src[i];
+// 		i++;
+// 	}
+// 	dest[i] = '\0';
+// 	return (dest);
+// }
+
+char            *take_dollar_name(char *comd, int *k, t_env *envl)
 {
     char *name;
     char *old_comd;
     char *after_dollar;
     int i;
-    int len;
+    size_t len;
 
 
     i = *k;
     len = 0;
-    //end = *k;
-    //old_comd = comd;
     old_comd = ft_substr(comd,0,i);
-    printf("old comd{%s}\n",old_comd);
-    // if (comd[i] == '$' && (ft_strchr("\" \t\0", comd[i + 1]) != NULL))
-    //     ft_strlcpy(comd,ft_strjoin(old_comd,"$"),ft_strlen(ft_strjoin(old_comd,"$")) + 1);
-    // else
-    // {
+    if (ft_strchr("\\ \0",comd[i + 1]) == NULL)
         ft_new_str(comd,i);
+    if (ft_isdigit(comd[i]) == 1)
+        name = ft_substr(comd,i++,1);
+    else
         name = get_dollar_name(comd, &i);
-        *k = i;
-        after_dollar = after_dollar_value(comd, i);
+    *k = i;
+    
+    after_dollar = after_dollar_value(comd, i);
     if (ft_strcmp(name, "") != 0)
     {
-        while (envl != NULL)
+        if (ft_strcmp(name,"0") == 0)
         {
-            if (ft_strcmp(name,envl->name) == 0)
-            {
-                len = ft_strlen(ft_strjoin(old_comd,envl->value));
-                ft_strlcpy(comd,ft_strjoin(old_comd,envl->value),len);
-                break;
-            }else
-            {
-                len = 1;
-                ft_strlcpy(comd,ft_strjoin(old_comd,""),len);
-                //break;
-            }
-            envl = envl->next;
+            len = ft_strlen(old_comd) + ft_strlen("bash");
+            comd = ft_strjoin(old_comd,"bash");
         }
-        *k = *k + len;
+        else
+        {
+            while (envl != NULL)
+            {
+                if (ft_strcmp(name,envl->name) == 0)
+                {
+                    len = ft_strlen(old_comd) + ft_strlen(envl->value);
+                    comd = ft_strjoin(old_comd,envl->value);
+                    break;
+                }
+                else
+                {
+                    len = 1;
+                    comd = ft_strjoin(old_comd,"");
+                }
+                envl = envl->next;
+            }
+        }
+        *k = len - 1;
     }
     else
     {
         len = ft_strlen(old_comd);
-        ft_strlcpy(comd,ft_strjoin(old_comd,""),len);
+        comd = ft_strjoin(old_comd,"");
     }
-    ft_strlcpy(comd,ft_strjoin(comd,after_dollar),len + ft_strlen(after_dollar));
-    
+    comd = ft_strjoin(comd,after_dollar);
+    return(comd);
 }
 
 void       expanding(t_command *cmd, t_env *env_lst)
 {
+    t_redirection *current_redir_list;
     int i,j;
     i = 0;
     j = 0;
@@ -192,8 +215,9 @@ void       expanding(t_command *cmd, t_env *env_lst)
                 j = 0;
                 while (cmd->command[i][j] != '\0')
                 {
+                    //printf("char[%c]\n",cmd->command[i][j]);
                     if (cmd->command[i][j] == '$')
-                        take_dollar_name(cmd->command[i], &j, env_lst);
+                        cmd->command[i] = take_dollar_name(cmd->command[i], &j, env_lst);
                     if (cmd->command[i][j] == '\\')
                     {
                         //if (ft_strchr("\\`$\"",cmd->command[i][j + 1]) != NULL)
@@ -205,20 +229,45 @@ void       expanding(t_command *cmd, t_env *env_lst)
                     else if (cmd->command[i][j] == '"')
                     {
                         ft_new_str(cmd->command[i], j);
-                        j = j + expand_double_quotes(cmd->command[i], j, env_lst);
+                        j = expand_double_quotes(&cmd->command[i], j, env_lst);
                         //j--;
                     }else if (cmd->command[i][j] == '\'')
                     {
                         ft_new_str(cmd->command[i], j);
-                        j = j + expand_single_quote(cmd->command[i], j);
+                        j = expand_single_quote(cmd->command[i], j);
                         //j--;
                     }
                     j++;
                 }
                 i++;
             }
-        }   
-        //}
+        }
+        if (cmd->redirection)
+        {
+            current_redir_list = cmd->redirection;
+            while (current_redir_list)
+            {
+                i = 0;
+                while (current_redir_list->file[i] != '\0')
+                {
+                    if (current_redir_list->file[i] == '$')
+                       current_redir_list->file = take_dollar_name(current_redir_list->file, &i, env_lst);
+                    if (current_redir_list->file[i] == '\\')
+                        ft_new_str(current_redir_list->file, i);
+                    else if (current_redir_list->file[i] == '"')
+                    {
+                        ft_new_str(current_redir_list->file, i);
+                        i = i + expand_double_quotes(&current_redir_list->file, i, env_lst);
+                    }else if (current_redir_list->file[i] == '\'')
+                    {
+                        ft_new_str(current_redir_list->file, i);
+                        i = i + expand_single_quote(current_redir_list->file, i);
+                    }
+                    i++;
+                }
+                current_redir_list = current_redir_list->next;
+            }
+        }
         //printf("after expanding[%s]\n",cmd->command[i - 2]);
        // printf("after expanding[%s]\n",cmd->command[i - 1]);
     //}
