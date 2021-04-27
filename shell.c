@@ -30,24 +30,51 @@ void    prompt()
     ft_putstr_fd("\033[0;36mMy_Minishell $>\e[0m", 0);
 }
 
-// void    exec()
-// {
-//     while (curr_cmd)
-//     {
-//         expanding();
-//         if (curr_cmd->sp == pipe)
-//         {
+void    free_list(t_token_list *var)
+{
+    t_token_list *curr = var;
 
-//         }
-//         else
-//         {
-            
-//         }
-        
-//     }
-// }
+    while (curr)
+    {
+        if (curr->value)
+        {
+            free(curr->value);
+            curr->value = NULL;
+        }
+        free(curr);
+        curr = curr->next;
+    }
+    free(curr);
+}
 
-// int ac ,char **av, char **env
+void    destroy_list_cmd(t_command *cmd)
+{
+    t_command *curr_cmd;
+
+    curr_cmd = cmd;
+    while (curr_cmd)
+    {
+        if (curr_cmd->command)
+        {
+            int j = 0;
+            while (curr_cmd->command[j])
+            {
+                free(curr_cmd->command[j]);
+                j++;
+            }
+            free(curr_cmd->command);
+        }
+        if (curr_cmd->redirection)
+        {
+            destroy_redirection_list(curr_cmd->redirection);
+        }
+        free(curr_cmd);
+        curr_cmd = curr_cmd->next;
+    }
+    free(curr_cmd);
+    
+}
+
 int     main(int argc, char **argv, char **env)
 {
     t_token_list *var;
@@ -70,7 +97,6 @@ int     main(int argc, char **argv, char **env)
         r = get_next_line(0, &line);
         if (r > 0)
         {
-           // ft_putstr_fd(line, 0);
 		    write(1, "\n",1);
         }
         var = ft_lexer(line);
@@ -79,15 +105,15 @@ int     main(int argc, char **argv, char **env)
         if (syntax_rslt != 1)
         {
             cmd = ft_parce(var);
-            //expanding();
             expanding(cmd, lenv);
-            //exec();
             display_commands(cmd);
+            destroy_list_cmd(cmd);
+            free_list(var);
         }
-
+        free(line);
         if (ft_strcmp((const char*)line,"exit") == 0)
         {
-            free(line);
+            //free(line);
             break;
         }
     }

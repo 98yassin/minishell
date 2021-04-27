@@ -16,10 +16,8 @@ t_token_list        *initialize_list()
 {
     t_token_list *first_token;
     first_token = malloc(sizeof(t_token_list));
-    //first_token = NULL;
-    //first_token->index = 0;
     first_token->type = NONE;
-    first_token->value = ft_strdup("NONE");
+    first_token->value =  ft_strdup("NONE");
     first_token->next = NULL;
     return (first_token);
 }
@@ -31,7 +29,7 @@ void        add_token(t_token_list *var,char *type,char *value)
     new_token = var;
     while (new_token->next != NULL)
         new_token = new_token->next;
-    new_token->next = malloc(sizeof(t_token_list));
+    new_token->next = (t_token_list *)malloc(sizeof(t_token_list));
     new_token->next->type = type;
     new_token->next->value = value;
     new_token->next->next = NULL;
@@ -50,41 +48,61 @@ void        display_token(t_token_list *var)
         ft_putstr_fd(var->type,1);
         write(1,"}",1);
         write(1,"\n",1);
+        write(1,RESET,ft_strlen(RESET));
         var = var->next;
     }
 }
 
-void        get_symbole(t_token_list *var, char *line, t_str *index)
+int         get_pipe_symbole(t_token_list *var, char *line, int i)
 {
     char *token;
-    int i;
 
-    i = index->i;
-    if (line[i] == '|')
-    {
-        if (line[i + 1] == '|')
+    if (line[i + 1] == '|')
         {
             token = ft_strdup("||");
             i++;
         }
         else
-            token = strdup("|");
-        add_token(var,PIPE,token);
-    }
-    if (line[i] == ';')
-    {
-        if (line[i + 1] == ';')
         {
-            token = ft_strdup(";;");
-            i++;
+            token = strdup("|");
         }
-        else 
-            token = ft_strdup(";");
-        add_token(var, SEMICOLON, token);
-    }
-    if (line[i] == '>')
-    {
-        if (line[i + 1] == '>')
+        add_token(var,PIPE,token);
+        return(i);
+}
+
+int         get_semi_symbole(t_token_list *var, char *line, int i)
+{
+    char *token;
+
+    int k = i + 1;
+        int rslt = 0;
+        while (line[k])
+        {
+            if (ft_strchr(" \t", line[k]) == NULL)
+            {
+                rslt = 1;
+                break;
+            }
+            k++;
+        }
+        if (rslt == 1)
+        {
+            if (line[i + 1] == ';')
+            {
+                token = ft_strdup(";;");
+                i++;
+            }
+            else 
+                token = ft_strdup(";");
+            add_token(var, SEMICOLON, token);
+        }
+        return(i);
+}
+
+int         get_rg_symbole(t_token_list *var, char *line, int i)
+{
+    char *token;
+    if (line[i + 1] == '>')
         {
             token = ft_strdup(">>");
             add_token (var, DOUBLE_GREATER, token);
@@ -95,10 +113,13 @@ void        get_symbole(t_token_list *var, char *line, t_str *index)
             token = ft_strdup(">");
             add_token (var, REDIR_GREATER, token);
         }
-    }
-    if (line[i] == '<')
-    {
-        if (line[i + 1] == '<')
+        return(i);
+}
+
+int         get_rl_symbole(t_token_list *var, char *line, int i)
+{
+    char *token;
+    if (line[i + 1] == '<')
         {
             token = ft_strdup("<<");
             i++;
@@ -106,72 +127,82 @@ void        get_symbole(t_token_list *var, char *line, t_str *index)
         else
             token = ft_strdup("<");
         add_token (var, REDIR_LESSER, token);
-    }
-    index->i = i;
+        return(i);
 }
 
-char        *Treat_Quotes(t_str *index, char *line)
+void        get_symbole(t_token_list *var, char *line, int *index)
+{
+    int i;
+
+    i = *index;
+    if (line[i] == '|')
+        i = get_pipe_symbole(var, line, i);
+    if (line[i] == ';')
+        i = get_semi_symbole(var, line, i);
+    if (line[i] == '>')
+        i = get_rg_symbole(var, line ,i);
+    if (line[i] == '<')
+        i = get_rl_symbole(var, line, i);
+    *index = i;
+}
+
+char        *Treat_Quotes(int *index, char *line, char type)
 {
     char *Double_Quote;
-    char *Single_Quote;
+    //char *Single_Quote;
 
     int backslash;
     int j;
-    if (line[index->i] == '"')
-    {
-        j = index->i; 
+    int i;
+
+    i = *index;
+    //if (line[i] == type)
+    //{
+        j = i; 
         j++;
-        while (line[j] != '\0' && line[j] != '"')
+        while (line[j] != '\0' && line[j] != type)
         {
             if (line[j] == '\\')
             {
                 backslash = check_backslash(line, j);
                 if (backslash % 2 != 0)
-                {
-                    //Double_Quote = ft_strjoin(Double_Quote, ft_substr(line, j, backslash + 1));
                     j = j + backslash;
-                    backslash = 0;
-                }else
-                {
+                else
                     j = j + backslash - 1;
-                    backslash = 0;
-                }
-
+                backslash = 0;
             }
             j++;
         }
-        Double_Quote = ft_substr(line,index->i,(j - index->i + 1));
-        index->i = j;
+        Double_Quote = ft_substr(line,i,(j - i + 1));
+        *index = j;
         return (Double_Quote);
-    }
-    else if (line[index->i] == '\'')
-    {
-        j = index->i;
-        j++;
-        while (line[j] != '\0' && line[j] != '\'')
-        {
-            if (line[j] == '\\')
-            {
-                backslash = check_backslash(line, j);
-                if (backslash % 2 != 0)
-                {
-                    //Double_Quote = ft_strjoin(Double_Quote, ft_substr(line, j, backslash + 1));
-                    j = j + backslash;
-                    backslash = 0;
-                }else
-                {
-                    j = j + backslash - 1;
-                    backslash = 0;
-                }
-
-            }
-            j++;
-        }
-        Single_Quote = ft_substr(line,index->i,(j - index->i + 1));
-        index->i = j;
-        return(Single_Quote);
-    }
-    return (NULL);
+    //}
+    // else if (line[i] == '\'')
+    // {
+    //     j = i;
+    //     j++;
+    //     while (line[j] != '\0' && line[j] != '\'')
+    //     {
+    //         if (line[j] == '\\')
+    //         {
+    //             backslash = check_backslash(line, j);
+    //             if (backslash % 2 != 0)
+    //             {
+    //                 j = j + backslash;
+    //                 backslash = 0;
+    //             }else
+    //             {
+    //                 j = j + backslash - 1;
+    //                 backslash = 0;
+    //             }
+    //         }
+    //         j++;
+    //     }
+    //     Single_Quote = ft_substr(line,i,(j - i + 1));
+    //     *index = j;
+    //     return(Single_Quote);
+    // }
+    //return (NULL);
 }
 
 int         check_backslash(char *line, int i)
@@ -186,72 +217,133 @@ int         check_backslash(char *line, int i)
     return(backslash);
 }
 
+void                backslash_impair(char *line, char **token, int *k, int *backslash)
+{
+    char *str;
+    int i;
+    char *tmp;
+
+    i = *k;
+    str = ft_substr(line, i, *(backslash) + 1);
+    tmp = ft_strjoin((*token), str);
+    free((*token));
+    free(str);
+    (*token) = tmp;
+    i = i + *(backslash);
+    *(backslash) = 0;
+    *k = i;
+}
+
+void            backslash_exist(char *line, char **token, int *k, int *backslash)
+{
+    char *str;
+    int i;
+    char *tmp;
+
+    i = *k;
+    str = ft_substr(line, i, *(backslash));
+    tmp = ft_strjoin(*(token), str);
+    free(*(token));
+    free(str);
+    (*token) = tmp;
+    i = i + *(backslash) - 1;
+    *(backslash) = 0;
+    *k = i;
+}
+
+void                backslash_not_exist(char *line, char **token, int *k)
+{
+    char *str;
+    int i;
+    char *tmp;
+
+    i = *k;
+    str = ft_substr(line, i, 1);
+    tmp = ft_strjoin(*(token), str);
+    free(*(token));
+    free(str);
+    (*token) = tmp;
+    *k = i;
+}
+
+void                quotes(char **token, int *k, char *line, char type)
+{
+    char *trt;
+    char *tmp;
+    int i;
+    
+    i = *k;
+    trt = Treat_Quotes(&i, line, type);
+    tmp = ft_strjoin(*(token), trt);
+    free(*(token));
+    *(token) = tmp;
+    free(trt);
+    *k = i;
+}
+
+char                *get_word(char *line, int *k)
+{
+    char *token;
+    int backslash;
+    int i;
+    //char *tmp;
+    //char *trt;
+
+    token = ft_strdup("");
+    backslash = 0;
+    i = *k;
+    while ((line[i] != '\0') && (ft_strchr("|;> <\t",line[i]) == NULL))
+        {
+            backslash = check_backslash(line, i);
+            if (backslash % 2 != 0)
+                backslash_impair(line, &token, &i, &backslash);
+            else if (line[i] == '"' || line[i] == '\'')
+            {
+                quotes(&token, &i, line, line[i]);
+                // trt = Treat_Quotes(&i, line, line[i]);
+                // tmp = ft_strjoin(token, trt);
+                // free(token);
+                // token = tmp;
+                // free(trt);
+            }
+            else
+            {
+                if (backslash > 0)
+                    backslash_exist(line, &token, &i, &backslash);
+                else
+                    backslash_not_exist(line, &token, &i);
+            }
+            i++;
+        }
+        *k = i;
+        return(token);
+}
+
 t_token_list      *ft_lexer(char *line)
 {
     t_token_list *var;
-    t_str index;
-    char *token; 
-    char *str;
-    int backslash = 0;
-    // while (line[i] != '\0')
-    // {
-    //     if (line[i] == '"' && backslash == 0)
-    //         treat_double_quotes();
-    //     if (line[i] == '\\' && backslash == 0)
-    //         backslash = 1;
-    //     else
-    //         backslash = 0;
-    //     i++;
-    // }
-    token = ft_strdup("");
-    index.i = 0;
-    var = NULL;
+    t_var lexer;
+
+    lexer.i = 0;
+    //var = NULL;
     var = initialize_list();
-    while (line[index.i])
+    while (line[lexer.i])
     {
-        //backslash = check_backslash(line, index.i);
-        while ((line[index.i] == ' ' || line[index.i] == '\t'))
-            index.i++;
-        if (line[index.i] == '|' || line[index.i] == ';' || line[index.i] == '>' || line[index.i] == '<')
+        lexer.token = ft_strdup("");
+        lexer.tmp =  lexer.token;
+        while ((line[  lexer.i] == ' ' || line[lexer.i] == '\t'))
+            lexer.i++;
+        if (line[  lexer.i] == '|' || line[lexer.i] == ';'
+                                || line[lexer.i] == '>' || line[lexer.i] == '<')
         {
-            get_symbole(var,line,&index);
-            index.i++;
+            get_symbole(var,line,&lexer.i);
+            lexer.i++;
         }
-        while ((line[index.i] != '\0') && (ft_strchr("|;> <\t",line[index.i]) == NULL))
-        {
-            backslash = check_backslash(line, index.i);
-            if (backslash % 2 != 0)
-            {
-                token = ft_strjoin(token, ft_substr(line, index.i, backslash + 1));
-                index.i = index.i + backslash;
-                backslash = 0;
-            }
-            else if (line[index.i] == '"' || line[index.i] == '\'')
-            {
-                //index->i = get_word(var, index, line);
-                token = ft_strjoin(token, Treat_Quotes(&index, line));
-            }else
-            {
-                if (backslash > 0)
-                {
-                    token = ft_strjoin(token, ft_substr(line, index.i, backslash));
-                    index.i = index.i + backslash - 1;
-                    backslash = 0;
-                }else
-                {
-                    str = ft_strjoin(token, ft_substr(line, index.i, 1));
-                    free(token);
-                    token = str;
-                }
-                
-            }
-            index.i++;
-        }
-        if ( ft_strcmp(token, "") != 0)
-        {
-            add_token(var, WORD, token);
-            token = ft_strdup("");
-        }
+        free(lexer.tmp);
+        if ((line[ lexer.i] != '\0') && (ft_strchr("|;> <\t",line[lexer.i]) == NULL))
+            lexer.token = get_word(line,&lexer.i);
+        if ( ft_strcmp(lexer.token, "") != 0)
+            add_token(var, WORD,   lexer.token);
     }
     add_token(var, NEWLINE, ft_strdup("NEWLINE"));
     return (var);

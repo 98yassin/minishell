@@ -59,12 +59,25 @@ typedef struct s_env
 }               t_env;
 
 
-typedef struct s_struct
+typedef struct s_lexer
 {
     int i;
-}               t_str;
+    char *token;
+    char *tmp;
+}               t_var;
 
-typedef struct s_redirection //list of redirections and types
+typedef struct s_dollar_var
+{
+    char *name;
+    char *tmp;
+    char *old_comd;
+    char *after_dollar;
+    int i;
+    size_t len;
+}               t_d_var;
+
+
+typedef struct s_redirection 
 {
     char *type;
     char *file;
@@ -74,7 +87,7 @@ typedef struct s_redirection //list of redirections and types
 
 typedef enum e_type {e_pipe, e_semicolon, e_newline} t_type;
 
-typedef struct s_command //list of commands
+typedef struct s_command 
 {
     char **command;
     t_redirection *redirection;
@@ -92,10 +105,11 @@ int                 check_syntax_error(t_token_list *token_lst);
 void                display_commands(t_command *cmd);
 void                expanding(t_command *cmd, t_env *env_lst);
 t_env               *create_env_list(t_env *lenv, char **env);
-//void                take_dollar_name(char *comd, int *k, t_env *envl);
-char            *take_dollar_name(char *comd, int *k, t_env *envl);
+char                *take_dollar_name(char *comd, int *k, t_env *envl, int type);
+void                destroy_redirection_list(t_redirection *redirection);
 
 t_command           *ft_parce(t_token_list *token_list);
+void    free_list(t_token_list *var);
 
 
 #endif

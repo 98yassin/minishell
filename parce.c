@@ -16,6 +16,7 @@ void            display_commands(t_command *comd)
 {
     t_command *new_list;
     new_list = comd;
+    t_redirection *curr_redir;
     //int k = 0;
     while (new_list != NULL)
     {
@@ -34,17 +35,18 @@ void            display_commands(t_command *comd)
         }
         write(1,"}",1);
         write(1,"\n",1);
-        while (new_list->redirection != NULL)
+        curr_redir = new_list->redirection;
+        while (curr_redir != NULL)
         {
             write(1,Cyan,ft_strlen(Cyan));
             ft_putstr_fd("file: {",1);
-            ft_putstr_fd(new_list->redirection->file,1);
+            ft_putstr_fd(curr_redir->file,1);
             write(1,"}",1);
             ft_putstr_fd(" type : {",1);
-            ft_putstr_fd(new_list->redirection->type,1);
+            ft_putstr_fd(curr_redir->type,1);
             write(1,"}",1);
             write(1,"\n",1);
-            new_list->redirection = new_list->redirection->next;
+            curr_redir = curr_redir->next;
         }
         ft_putstr_fd("separatore: {",1);
         ft_putnbr_fd(new_list->seperator,1);
@@ -120,20 +122,39 @@ void            display_commands(t_command *comd)
 //     return (cmd);
 // }
 
-// void                destroy_redirection_list(t_redirection **redirection)
-// {
-//     t_redirection *current_redirection;
-//     while (*redirection != NULL)
-//     {
-//         current_redirection = *redirection;
-//         *redirection = (*redirection)->next;
-//         free(current_redirection->file);
-//         free(current_redirection->type);
-//         free(current_redirection);
-//         current_redirection = NULL;
-//     }
-//     *redirection = NULL;
-// }
+void                destroy_redirection_list(t_redirection *redirection)
+{
+    t_redirection *curr_redir;
+
+    curr_redir = redirection;
+
+    while (curr_redir)
+    {
+        if (curr_redir->file)
+        {
+            free(curr_redir->file);
+            curr_redir->file = NULL;
+        }
+        if (curr_redir->type)
+        {
+            free(curr_redir->type);
+            curr_redir->type = NULL;
+        }
+        free(curr_redir);
+        curr_redir = curr_redir->next;
+    }
+    free(curr_redir);
+    // while (redirection != NULL)
+    // {
+    //     current_redirection = redirection;
+    //     redirection = (redirection)->next;
+    //     free(current_redirection->file);
+    //     free(current_redirection->type);
+    //     free(current_redirection);
+    //     current_redirection = NULL;
+    // }
+    // redirection = NULL;
+}
 
 t_redirection       *initial_redirection(char *type, char *value)
 {
@@ -293,7 +314,6 @@ t_command           *ft_parce(t_token_list *token_list)
                 for (int i = 0; i < size; i++)
                     free(cmd_arg[i]);
                 free(cmd_arg);
-                //destroy_redirection_list(&redirection);
                 redirection = NULL;
             }
             //display_commands(cmd);
@@ -309,6 +329,8 @@ t_command           *ft_parce(t_token_list *token_list)
         //    free(cmd_arg);
             //break;
        // }
+
+        //destroy_redirection_list(redirection);
         current_token = current_token->next;
     }
     return(cmd);
