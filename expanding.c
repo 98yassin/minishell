@@ -112,7 +112,6 @@ char            *get_dollar_name(char *command,int *j)
         free(name);
         name = tmp;
         free(ptr);
-        printf("name[%p]\n",name);
         i++;
     }
     *j = i;
@@ -206,7 +205,7 @@ void            check_name(char **comd, int *k, char **name)
     int i;
 
     i = *k;
-    if (ft_strchr("\\ \0",(*comd)[i + 1]) == NULL)
+    if (ft_isalnum((*comd)[i + 1]) == 1/*ft_strchr("\\= \0",(*comd)[i + 1]) == NULL*/)
         ft_new_str((*comd),i);
     if (ft_isdigit((*comd)[i]) == 1)
         (*name) = ft_substr((*comd),i++,1);
@@ -230,8 +229,10 @@ char            *take_dollar_name(char *comd, int *k, t_env *envl, int type)
     dvar.len = 0;
     dvar.old_comd = ft_substr(comd,0,dvar.i);
     check_name(&comd, &dvar.i, &dvar.name);
-    *k = dvar.i;
     dvar.after_dollar = after_dollar_value(comd, dvar.i);
+    if (ft_strcmp(dvar.name, "") == 0)
+        dvar.i++;
+    *k = dvar.i;
     if (ft_strcmp(dvar.name, "") != 0)
     {
         if (ft_strcmp(dvar.name,"0") == 0)
@@ -248,6 +249,7 @@ char            *take_dollar_name(char *comd, int *k, t_env *envl, int type)
     if (ft_strcmp(comd,"") == 0 && type == 1)
         printf("\e[1;91m$%s: ambiguous redirect\e[0m\n", dvar.name);
     free_tvar(dvar);
+    printf("akhiiir[%s]\n",comd);
     return(comd);
 }
 
