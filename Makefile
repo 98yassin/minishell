@@ -2,7 +2,7 @@ NAME = minishell
 
 CFLAGS = -Wall -Wextra -Werror
 
-src = shell.c get_next_line.c lexer.c expanding.c parce.c env.c
+src = shell.c lexer.c expanding.c parce.c env.c
 
 libft = ./libft/libft.a
 
@@ -12,7 +12,7 @@ all : $(NAME)
 
 $(NAME): $(OBJ)
 	@make -C libft
-	@gcc $(CFLAGS) $(OBJ) $(libft) -o $(NAME)
+	@gcc $(CFLAGS) $(OBJ) $(libft) -o $(NAME) -lreadline
 
 clean:
 	rm -f $(OBJ)

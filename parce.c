@@ -14,45 +14,30 @@
 
 void            display_commands(t_command *comd)
 {
+    t_redirection *curr_redir;
     t_command *new_list;
     new_list = comd;
-    t_redirection *curr_redir;
-    //int k = 0;
+    printf("\e[1;33mall commands: \e[0m");
     while (new_list != NULL)
     {
-       // printf("node:{%d} : ",k++);
-        ft_putstr_fd("\e[1;33mall commands\e[0m", 0);
-        write(1,Cyan,ft_strlen(Cyan));
-        ft_putstr_fd("command: {\n",1);
+		printf("%s\ncommand: ", Cyan);
         if (new_list->command != NULL)
         {
             int j = 0;
             while (new_list->command[j] != NULL)
             {
-                printf("[%s]\n", new_list->command[j]);
+				printf("[%s]", new_list->command[j]);
                 j++;
             }
         }
-        write(1,"}",1);
-        write(1,"\n",1);
+        printf("\n");
         curr_redir = new_list->redirection;
         while (curr_redir != NULL)
         {
-            write(1,Cyan,ft_strlen(Cyan));
-            ft_putstr_fd("file: {",1);
-            ft_putstr_fd(curr_redir->file,1);
-            write(1,"}",1);
-            ft_putstr_fd(" type : {",1);
-            ft_putstr_fd(curr_redir->type,1);
-            write(1,"}",1);
-            write(1,"\n",1);
+			printf("%stype: {%s} file: {%s}\n", Cyan, curr_redir->type, curr_redir->file);
             curr_redir = curr_redir->next;
         }
-        ft_putstr_fd("separatore: {",1);
-        ft_putnbr_fd(new_list->seperator,1);
-        write(1,"}",1);
-        write(1,"\n",1);
-        write(1,RESET,ft_strlen(RESET));
+		printf("separator: {%d}%s\n", new_list->seperator, RESET);
         new_list = new_list->next;
     }
 }

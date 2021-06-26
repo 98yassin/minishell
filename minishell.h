@@ -19,8 +19,9 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include "libft/libft.h"
-#include "get_next_line.h"
 
 #define GREEN "\e[1;32m"
 #define RESET "\e[0m"
@@ -73,14 +74,16 @@ typedef struct s_dollar_var
     char *old_comd;
     char *after_dollar;
     int i;
+	int t;
     size_t len;
 }               t_d_var;
 
+//expanding outside "" an expandind inside ""
 
 typedef struct s_redirection 
 {
-    char *type;
-    char *file;
+    char *type; // <<
+    char *file; // xd1    heredoc = treat_heredoc  file = herdoc
     struct s_redirection *next;
     
 }               t_redirection;

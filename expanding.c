@@ -6,7 +6,7 @@
 /*   By: yait-kad <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/03 12:06:00 by yait-kad          #+#    #+#             */
-/*   Updated: 2021/05/05 14:38:05 by yait-kad         ###   ########.fr       */
+/*   Updated: 2021/04/03 12:06:03 by yait-kad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 //     {
 //         if (str[i] == c)
 //             str[i] = str[i + 1];    
-//     }hello
+//     }
 //     return (str);
 // }
 
@@ -200,18 +200,60 @@ void            name_empty(char **comd, char *old_comd, size_t *k)
     *k = len;
 }
 
-void            check_name(char **comd, int *k, char **name)
+char	*expand_name(char *comd, int *k)
 {
-    int i;
+	//char *name;
+	int i;
 
-    i = *k;
-    if (ft_isalnum((*comd)[i + 1]) == 1/*ft_strchr("\\= \0",(*comd)[i + 1]) == NULL*/)
-        ft_new_str((*comd),i);
-    if (ft_isdigit((*comd)[i]) == 1)
-        (*name) = ft_substr((*comd),i++,1);
-    else
-        (*name) = get_dollar_name((*comd), &i);
+	i = *k;
+	while (comd)
+	{
+		if (comd[i] == '\'' || comd[i] == '\"')
+			break;
+		i++;
+	}
+	//*k = i;
+	return (ft_strdup(""));
+}
+
+int	check_name(char **comd, int *k, char **name)
+{
+	int tmp;
+	int i;
+
+	i = *k;
+	tmp = 0;
+	printf("pos1[%c]\n", (*comd)[i]);
+	if ((*comd)[i + 1] == '"' || (*comd)[i + 1] == '\'')
+	{
+		printf("111\n");
+		ft_new_str((*comd),i);
+		ft_new_str((*comd),i);
+		//expand_name((*comd), i);
+		tmp = 1;
+	}
+	else
+	{
+printf("222\n");
+		if (ft_isalnum((*comd)[i + 1]) == 1)
+		{
+printf("333\n");
+			ft_new_str((*comd),i);
+		}
+		if (ft_isdigit((*comd)[i]) == 1)
+		{
+printf("444\n");
+			(*name) = ft_substr((*comd),i++,1);
+		}
+		else
+		{
+printf("555\n");
+			(*name) = get_dollar_name((*comd), &i);
+printf("name[%s]\n", (*name));
+		}
+	}
     *k = i;
+	return (tmp);
 }
 
 void            free_tvar(t_d_var dvar)
@@ -227,13 +269,15 @@ char            *take_dollar_name(char *comd, int *k, t_env *envl, int type)
 
     dvar.i = *k;
     dvar.len = 0;
+	dvar.name = ft_strdup("");
     dvar.old_comd = ft_substr(comd,0,dvar.i);
-    check_name(&comd, &dvar.i, &dvar.name);
+    dvar.t = check_name(&comd, &dvar.i, &dvar.name);
+printf("name[%s]pos[%c]\n", dvar.name, comd[dvar.i]);
     dvar.after_dollar = after_dollar_value(comd, dvar.i);
-    if (ft_strcmp(dvar.name, "") == 0)
+    if (ft_strcmp(dvar.name, "") == 0 && dvar.t == 0)
         dvar.i++;
     *k = dvar.i;
-    if (ft_strcmp(dvar.name, "") != 0)
+    if (ft_strcmp(dvar.name, "") != 0 && dvar.t == 0)
     {
         if (ft_strcmp(dvar.name,"0") == 0)
             dollar_zero(&comd, dvar.old_comd, &dvar.len);
@@ -249,7 +293,6 @@ char            *take_dollar_name(char *comd, int *k, t_env *envl, int type)
     if (ft_strcmp(comd,"") == 0 && type == 1)
         printf("\e[1;91m$%s: ambiguous redirect\e[0m\n", dvar.name);
     free_tvar(dvar);
-    printf("akhiiir[%s]\n",comd);
     return(comd);
 }
 
@@ -332,9 +375,7 @@ void       expanding(t_command *cmd, t_env *env_lst)
 
 void        display_error(char *value)
 {
-    ft_putstr_fd("\e[1;91mMy_Minishell: syntax error near unexpected token ",1);
-    ft_putstr_fd(value ,1);
-    ft_putstr_fd("\e[0m\n",1);
+	printf("\e[1;91mMy_Minishell: syntax error near unexpected token %s\e[0m\n",value);
 }
 
 void        destroy_list(t_token_list *lst)
@@ -519,18 +560,14 @@ int         syntax_error_word(t_token_list *token_word, t_token_list *head)
     result = 0;
     if (((check_backslash_end(token_word->value))) % 2 != 0)
     {
-        write(1,RED,ft_strlen(RED));
-        ft_putstr_fd("syntax error multiple line not allowed\n",1);
-        write(1,RESET,ft_strlen(RESET));
+		printf("%ssyntax error multiple line not allowed\n%s", RED, RESET);
         destroy_list(head);
         result = 1;
 //        break;
     }
     if (check_quotes(token_word->value) == -1)
     {
-        write(1,RED,ft_strlen(RED));
-        ft_putstr_fd("syntax error multiple line not allowed\n",1);
-        write(1,RESET,ft_strlen(RESET));
+		printf("%ssyntax error multiple line not allowed\n%s", RED, RESET);
         destroy_list(head);
         result = 1;
         //break;

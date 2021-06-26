@@ -40,15 +40,7 @@ void        display_token(t_token_list *var)
 {
     while (var != NULL)
     {
-        write(1,Purple,ft_strlen(Purple));
-        write(1,"{",1);
-        ft_putstr_fd(var->value,1);
-        write(1,"}",1);
-        ft_putstr_fd(" type : {",1);
-        ft_putstr_fd(var->type,1);
-        write(1,"}",1);
-        write(1,"\n",1);
-        write(1,RESET,ft_strlen(RESET));
+		printf("%s{%s} type : {%s}\n%s", PURPLE, var->value, var->type, RESET);
         var = var->next;
     }
 }
@@ -95,7 +87,7 @@ int         get_semi_symbole(t_token_list *var, char *line, int i)
             else 
                 token = ft_strdup(";");
             add_token(var, SEMICOLON, token);
-        }
+       }
         return(i);
 }
 
