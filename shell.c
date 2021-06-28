@@ -67,7 +67,6 @@ void    destroy_list_cmd(t_command *cmd)
         curr_cmd = curr_cmd->next;
     }
     free(curr_cmd);
-    
 }
 
 int     main(int argc, char **argv, char **env)
@@ -87,14 +86,14 @@ int     main(int argc, char **argv, char **env)
     lenv = create_env_list(lenv, env);
     while (1)
     {
-		line = readline("My_Minishell $>");
+		line = readline("My_Minishell $ ");
 		add_history(line);
         var = ft_lexer(line);
         display_token(var);
         syntax_rslt = check_syntax_error(var);
         if (syntax_rslt != 1)
         {
-            cmd = ft_parce(var);
+            cmd = ft_parce(var, lenv);
             expanding(cmd, lenv);
             display_commands(cmd);
             destroy_list_cmd(cmd);

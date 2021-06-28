@@ -114,11 +114,14 @@ int         get_rl_symbole(t_token_list *var, char *line, int i)
     if (line[i + 1] == '<')
         {
             token = ft_strdup("<<");
+			add_token (var, DOUBLE_LESSER, token);
             i++;
         }
         else
+		{
             token = ft_strdup("<");
-        add_token (var, REDIR_LESSER, token);
+        	add_token (var, REDIR_LESSER, token);
+		}
         return(i);
 }
 

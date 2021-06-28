@@ -141,19 +141,146 @@ void                destroy_redirection_list(t_redirection *redirection)
     // redirection = NULL;
 }
 
-t_redirection       *initial_redirection(char *type, char *value)
+t_redirection       *initial_redirection(char *type, char *value, t_env *lenv)
 {
     t_redirection *new_redirection;
 
     //new_redirection = redirection;
     new_redirection = malloc(sizeof(t_redirection));
+	if (type == DOUBLE_LESSER)
+		value = treat_heredocs(value, lenv);
     new_redirection->type = ft_strdup(type);
     new_redirection->file = ft_strdup(value);
     new_redirection->next = NULL;
     return (new_redirection);
 }
 
-void                add_redirection(t_redirection *redirection, char *type, char *value)
+
+
+char	*expand_herdocs(char *buffer, t_env *lenv)
+{
+	char	*before_dollar;
+	char	*env_name;
+	char	*after_dollar;
+	int		i;
+	size_t	len;
+
+	i = 0;
+	before_dollar = ft_strdup("");
+	while (buffer[i] != '\0')
+	{
+		if (buffer[i] == '$' && ft_isalnum(buffer[i + 1]) == 1)
+		{
+			ft_new_str(buffer, i);
+			before_dollar = ft_substr(buffer, 0, i);
+			env_name = get_dollar_name(buffer, &i);
+			after_dollar = after_dollar_value(buffer, i);
+			len = dollar_val(&buffer, env_name, before_dollar, lenv);
+			buffer = ft_strjoin(buffer, after_dollar);
+			printf("len[%zu]\n", len);
+			i = len - 1;
+		}
+		// else
+		// {
+		// 	get_char = ft_substr(buffer,i,1);
+		// 	new_buffer = ft_strjoin(new_buffer,get_char);
+		// } 
+		i++;
+	}
+	return (buffer);
+}
+
+#define NAN -1
+#define CLOSED 0
+#define OPENED 1
+
+char	*remove_quotes(char *delimiter, int *qt)
+{
+	int		i;
+	// int		j;
+	// char	*new_delimiter;
+	char		state;
+	// int		old_state;
+
+	// state = NAN;
+	// old_state = NAN;
+	i = 0;
+	// j = 0;
+
+	// new_delimiter = malloc(sizeof(char) * ft_strlen(delimiter));
+	while (delimiter[i] != '\0')
+	{
+		if (delimiter[i] == '"' || delimiter[i] == '\'')
+		{
+			*qt = 1;
+			state = delimiter[i];
+			ft_new_str(delimiter, i);
+			while (delimiter[i] != '\0' && delimiter[i] != state)
+				i++;
+			if (delimiter[i] == state)
+				ft_new_str(delimiter, i);
+			i--;
+		}
+
+		// if (delimiter[i] == '"')
+		// {
+		// 	old_state = state;
+		// 	if (state != OPENED)
+		// 		state = OPENED;
+		// 	else
+		// 		state = CLOSED;
+		// }
+		
+		// if (old_state != state)
+		// {
+		// 	i++;
+		// 	old_state = state;
+		// 	continue ;
+		// }
+
+		// new_delimiter[j] = delimiter[i];
+		// j++;
+		// 	printf("why\n");
+		i++;
+	}
+	// new_delimiter[j] = '\0';
+	// printf("{%s}\n", delimiter);
+	return (delimiter);
+}
+
+char	*treat_heredocs(char *delimiter, t_env *lenv)
+{
+	char	*line;
+	char	*buffer;
+	int q_exist;
+
+	q_exist = 0;
+	buffer = ft_strdup("");
+	// if delimiter has quotes(single or double) no expanding
+	// if (delimiter[0] == '"' || delimiter[0] == '\'')
+	// {
+	// 	q_exist = 1;
+	// }
+	delimiter = remove_quotes(delimiter, &q_exist);
+	while (1)
+	{
+		line = readline(">>");
+		if (ft_strcmp(line, delimiter) == 0)
+			break ;
+		line = ft_strjoin(line, "\n");
+		buffer = ft_strjoin(buffer, line);
+		///join lines to buffer with '\n'
+
+		free(line);
+	}
+	//(void)lenv;
+	if (q_exist == 0)
+		buffer = expand_herdocs(buffer, lenv);
+	// printf("herdocs[%s]\n", buffer);
+	return (buffer);
+}
+
+void                add_redirection(t_redirection *redirection, char *type, char *value, t_env *lenv)
 {
     t_redirection *new_redirection;
 
@@ -163,6 +290,8 @@ void                add_redirection(t_redirection *redirection, char *type, char
         new_redirection = new_redirection->next;
     }
     new_redirection->next = malloc(sizeof(t_redirection));
+	if (type == DOUBLE_LESSER)
+		value = treat_heredocs(value, lenv);
     new_redirection->next->type = ft_strdup(type);
     new_redirection->next->file = ft_strdup(value);
     new_redirection->next->next = NULL;
@@ -194,9 +323,9 @@ t_command           *initial_cmd(char **cmd_arg, t_redirection *redirection, cha
     first_cmd = malloc(sizeof(t_command));
     i = 0;
     first_cmd->command = NULL;
-    size = tab_size(cmd_arg);
     if (cmd_arg != NULL)
     {
+    	size = tab_size(cmd_arg);
         first_cmd->command = (char **)malloc(sizeof(char *) * (size + 1));
         while (cmd_arg[i] != NULL)
         {
@@ -224,9 +353,9 @@ void                add_cmd(t_command *cmd, char **cmd_arg, t_redirection *redir
         new_cmd = new_cmd->next;
     new_cmd->next = malloc(sizeof(t_command));
     new_cmd->next->command = NULL;
-    size = tab_size(cmd_arg);
     if (cmd_arg != NULL)
     {
+    	size = tab_size(cmd_arg);
         new_cmd->next->command = (char **)malloc(sizeof(char *) * (size + 1));
         while (cmd_arg[i] != NULL)
         {
@@ -240,7 +369,7 @@ void                add_cmd(t_command *cmd, char **cmd_arg, t_redirection *redir
     new_cmd->next->next = NULL;
 }
 
-t_command           *ft_parce(t_token_list *token_list)
+t_command           *ft_parce(t_token_list *token_list, t_env *lenv)
 {
     t_command       *cmd;
     t_redirection   *redirection;
@@ -256,7 +385,7 @@ t_command           *ft_parce(t_token_list *token_list)
     cmd = NULL;
     while (current_token)
     {
-        if (current_token->type == WORD)
+		if (current_token->type == WORD)
         {
             size = 0;
             first_word = current_token;
@@ -275,12 +404,13 @@ t_command           *ft_parce(t_token_list *token_list)
             }
             cmd_arg[i] = NULL;
         }
-        if (current_token->type == REDIR_GREATER || current_token->type == REDIR_LESSER || current_token->type == DOUBLE_GREATER)
+        if (current_token->type == REDIR_GREATER || current_token->type == REDIR_LESSER 
+			|| current_token->type == DOUBLE_LESSER || current_token->type == DOUBLE_GREATER)
         {
             if (!redirection)
-                redirection = initial_redirection(current_token->type,current_token->next->value);
+                redirection = initial_redirection(current_token->type,current_token->next->value, lenv);
             else
-                add_redirection(redirection,current_token->type,current_token->next->value);
+                add_redirection(redirection,current_token->type,current_token->next->value, lenv);
             current_token = current_token->next;
         }
         if (current_token->type == PIPE || current_token->type == SEMICOLON || current_token->type == NEWLINE)
@@ -291,6 +421,7 @@ t_command           *ft_parce(t_token_list *token_list)
                 //for (int i = 0; i < size; i++)
                     //free(cmd_arg[i]);
                 free(cmd_arg);
+				cmd_arg = NULL;
                 redirection = NULL;
             }
             else
@@ -299,6 +430,7 @@ t_command           *ft_parce(t_token_list *token_list)
                 for (int i = 0; i < size; i++)
                     free(cmd_arg[i]);
                 free(cmd_arg);
+				cmd_arg = NULL;
                 redirection = NULL;
             }
             //display_commands(cmd);

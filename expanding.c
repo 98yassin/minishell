@@ -59,12 +59,12 @@ int        expand_double_quotes(char **str, int index, t_env *env_list)
             else if ((*str)[index] == '$' && (ft_strchr("\" \t", (*str)[index + 1]) == NULL))
             {
                 (*str) = take_dollar_name((*str), &index, env_list, 0);
-                index--;
+                //index--;
             }else if ((*str)[index] == '"')
             {
-                ft_new_str((*str), index);
-                index--;
-                break;
+				ft_new_str((*str), index);
+				index--;
+				break;
             }
             index++;
         }
@@ -223,10 +223,8 @@ int	check_name(char **comd, int *k, char **name)
 
 	i = *k;
 	tmp = 0;
-	printf("pos1[%c]\n", (*comd)[i]);
 	if ((*comd)[i + 1] == '"' || (*comd)[i + 1] == '\'')
 	{
-		printf("111\n");
 		ft_new_str((*comd),i);
 		ft_new_str((*comd),i);
 		//expand_name((*comd), i);
@@ -234,22 +232,17 @@ int	check_name(char **comd, int *k, char **name)
 	}
 	else
 	{
-printf("222\n");
 		if (ft_isalnum((*comd)[i + 1]) == 1)
 		{
-printf("333\n");
 			ft_new_str((*comd),i);
 		}
 		if (ft_isdigit((*comd)[i]) == 1)
 		{
-printf("444\n");
 			(*name) = ft_substr((*comd),i++,1);
 		}
 		else
 		{
-printf("555\n");
 			(*name) = get_dollar_name((*comd), &i);
-printf("name[%s]\n", (*name));
 		}
 	}
     *k = i;
@@ -272,7 +265,6 @@ char            *take_dollar_name(char *comd, int *k, t_env *envl, int type)
 	dvar.name = ft_strdup("");
     dvar.old_comd = ft_substr(comd,0,dvar.i);
     dvar.t = check_name(&comd, &dvar.i, &dvar.name);
-printf("name[%s]pos[%c]\n", dvar.name, comd[dvar.i]);
     dvar.after_dollar = after_dollar_value(comd, dvar.i);
     if (ft_strcmp(dvar.name, "") == 0 && dvar.t == 0)
         dvar.i++;
@@ -335,23 +327,26 @@ void        expand_redirection(t_command *cmd_r, t_env *env_r)
     while (current_redir_list)
     {
         i = 0;
-        while (current_redir_list->file[i] != '\0')
-        {
-            if (current_redir_list->file[i] == '$')
-               current_redir_list->file = take_dollar_name(current_redir_list->file, &i, env_r, 1);
-            if (current_redir_list->file[i] == '\\')
-                ft_new_str(current_redir_list->file, i);
-            else if (current_redir_list->file[i] == '"')
-            {
-                ft_new_str(current_redir_list->file, i);
-                i = i + expand_double_quotes(&current_redir_list->file, i, env_r);
-            }else if (current_redir_list->file[i] == '\'')
-            {
-                ft_new_str(current_redir_list->file, i);
-                i = i + expand_single_quote(current_redir_list->file, i);
-            }
-            i++;
-        }
+		if (ft_strcmp(current_redir_list->type, "DOUBLE_LESSER") != 0)
+		{
+        	while (current_redir_list->file[i] != '\0')
+        	{
+        	    if (current_redir_list->file[i] == '$')
+        	       current_redir_list->file = take_dollar_name(current_redir_list->file, &i, env_r, 1);
+        	    if (current_redir_list->file[i] == '\\')
+        	        ft_new_str(current_redir_list->file, i);
+        	    else if (current_redir_list->file[i] == '"')
+        	    {
+        	        ft_new_str(current_redir_list->file, i);
+        	        i = i + expand_double_quotes(&current_redir_list->file, i, env_r);
+        	    }else if (current_redir_list->file[i] == '\'')
+        	    {
+        	        ft_new_str(current_redir_list->file, i);
+        	        i = i + expand_single_quote(current_redir_list->file, i);
+        	    }
+        	    i++;
+        	}
+		}
         current_redir_list = current_redir_list->next;
     }
 }
@@ -602,22 +597,22 @@ int         syntax_error_semi(t_token_list *token_semi, t_token_list *head)
     return(result);
 }
 
-int         check_error(t_token_list *token_lst, t_token_list *old)
+int         check_error(t_token_list *tokn_lst, t_token_list *old)
 {
     int result;
 
     result = 0;
-    if (token_lst->type == NONE)
-        result = syntax_error_NONE(token_lst, old);
-    else if (token_lst->type == REDIR_GREATER || token_lst->type == REDIR_LESSER
-                                        || token_lst->type == DOUBLE_GREATER)
-        result = syntax_error_redir(token_lst, old);
-    else if (token_lst->type == PIPE)
-        result = syntax_error_pipe(token_lst, old);
-    else if (token_lst->type == WORD)
-        result = syntax_error_word(token_lst, old);
-    else if (token_lst->type == SEMICOLON)
-        result = syntax_error_semi(token_lst,old);
+    if (tokn_lst->type == NONE)
+        result = syntax_error_NONE(tokn_lst, old);
+    else if (tokn_lst->type == REDIR_GREATER || tokn_lst->type == REDIR_LESSER
+    	|| tokn_lst->type == DOUBLE_LESSER || tokn_lst->type == DOUBLE_GREATER)
+        result = syntax_error_redir(tokn_lst, old);
+    else if (tokn_lst->type == PIPE)
+        result = syntax_error_pipe(tokn_lst, old);
+    else if (tokn_lst->type == WORD)
+        result = syntax_error_word(tokn_lst, old);
+    else if (tokn_lst->type == SEMICOLON)
+        result = syntax_error_semi(tokn_lst,old);
     return(result);
 }
 

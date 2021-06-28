@@ -39,6 +39,7 @@
 #define REDIR_GREATER "REDIR_GREATER"
 #define REDIR_LESSER "REDIR_LESSER"
 #define DOUBLE_GREATER "DOUBLE_GREATER"
+#define DOUBLE_LESSER "DOUBLE_LESSER"
 #define WORD "WORD"
 #define NEWLINE "NEWLINE"
 
@@ -100,8 +101,8 @@ typedef struct s_command
 
 }               t_command;
 
-
 t_token_list        *ft_lexer(char *line);
+char	*treat_heredocs(char *delimiter, t_env *lenv);
 void                display_token(t_token_list *var);
 int                 check_backslash(char *line, int i);
 int                 check_syntax_error(t_token_list *token_lst);
@@ -111,8 +112,12 @@ t_env               *create_env_list(t_env *lenv, char **env);
 char                *take_dollar_name(char *comd, int *k, t_env *envl, int type);
 void                destroy_redirection_list(t_redirection *redirection);
 
-t_command           *ft_parce(t_token_list *token_list);
+t_command           *ft_parce(t_token_list *token_list, t_env *lenv);
 void    free_list(t_token_list *var);
+void    ft_new_str(char *str, int index);
+char            *get_dollar_name(char *command,int *j);
+size_t          dollar_val(char **comd, char *name, char *old_comd, t_env *envl);
+char            *after_dollar_value(char *command1, int i);
 
 
 #endif
