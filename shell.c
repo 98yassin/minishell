@@ -93,7 +93,7 @@ int     main(int argc, char **argv, char **env)
         syntax_rslt = check_syntax_error(var);
         if (syntax_rslt != 1)
         {
-            cmd = ft_parce(var, lenv);
+            cmd = ft_parse(var, lenv);
             expanding(cmd, lenv);
             display_commands(cmd);
             destroy_list_cmd(cmd);

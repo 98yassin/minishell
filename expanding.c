@@ -12,18 +12,6 @@
 
 #include "minishell.h"
 
-// char    *ft_new_str(char *str, int c)
-// {
-
-//     int i = -1;
-//     while (str[++i])
-//     {
-//         if (str[i] == c)
-//             str[i] = str[i + 1];    
-//     }
-//     return (str);
-// }
-
 void    ft_new_str(char *str, int index)
 {
     while (str[index] != '\0')
@@ -35,14 +23,6 @@ void    ft_new_str(char *str, int index)
 
 int        expand_double_quotes(char **str, int index, t_env *env_list)
 {
-    //index++;
-    // if (str[index] == '"')
-    // {
-    //     ft_new_str(str, index);
-    //     index--;
-    // }
-    // else 
-    // {
         
         while ((*str)[index] != '\0')
         {
@@ -68,19 +48,11 @@ int        expand_double_quotes(char **str, int index, t_env *env_list)
             }
             index++;
         }
-    // }
     return(index);
 }
 
 int         expand_single_quote(char *str, int index)
 {
-    //if (str[index] == '\'')
-    //{
-    //    ft_new_str(str, index);
-     //   index--;
-   // }
-   // else 
-    //{
         while (str[index] != '\0')
         {
             if (str[index] == '\'')
@@ -91,7 +63,6 @@ int         expand_single_quote(char *str, int index)
             }
             index++;
         }
-    //}
     return (index);
 }
 
@@ -105,7 +76,8 @@ char            *get_dollar_name(char *command,int *j)
     i = *j;
     name = ft_strdup("");
         
-    while (command[i] != '\0' && ft_isalnum(command[i]) == 1/*ft_strchr("\\' `$\":=/",command[i]) == NULL*/)
+    while (command[i] != '\0' && (ft_isalnum(command[i]) == 1
+		|| command[i] == '_'))
     {
         ptr = ft_substr(command, i, 1);
         tmp = ft_strjoin(name, ptr);
@@ -131,20 +103,6 @@ char            *after_dollar_value(char *command1, int i)
     after_dollar = ft_substr(command1,start, j);
     return (after_dollar);
 }
-
-// char *ft_strcpy(char *dest, char *src)
-// {
-// 	int i;
-
-// 	i = 0;
-// 	while (src[i] != '\0')
-// 	{
-// 		dest[i] = src[i];
-// 		i++;
-// 	}
-// 	dest[i] = '\0';
-// 	return (dest);
-// }
 
 void            dollar_zero(char **comd, char *old_comd, size_t *k)
 {
@@ -232,7 +190,7 @@ int	check_name(char **comd, int *k, char **name)
 	}
 	else
 	{
-		if (ft_isalnum((*comd)[i + 1]) == 1)
+		if (ft_isalnum((*comd)[i + 1]) == 1 || (*comd)[i + 1] == '_')
 		{
 			ft_new_str((*comd),i);
 		}
@@ -627,37 +585,6 @@ int        check_syntax_error(t_token_list *old)
         result = check_error(token_lst,old);
         if (result == 1)
             break;
-        // if (token_lst->type == NONE)
-        // {
-        //     result = syntax_error_NONE(token_lst, old);
-        //     if (result == 1)
-        //         break;
-        // }
-        // else if (token_lst->type == REDIR_GREATER || token_lst->type == REDIR_LESSER || token_lst->type == DOUBLE_GREATER)
-        // {
-        //     result = syntax_error_redir(token_lst, old);
-        //     if (result == 1)
-        //         break;
-        // }
-        
-        // else if (token_lst->type == PIPE)
-        // {
-        //     result = syntax_error_pipe(token_lst, old);
-        //     if (result == 1)
-        //         break;    
-        // }
-        // else if (token_lst->type == WORD)
-        // {
-        //     result = syntax_error_word(token_lst, old);
-        //     if (result == 1)
-        //         break;
-        // }
-        // else if (token_lst->type == SEMICOLON)
-        // {
-        //     result = syntax_error_semi(token_lst,old);
-        //     if (result == 1)
-        //         break;
-        // }
         token_lst = token_lst->next;
     }
     return (result);

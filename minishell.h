@@ -112,7 +112,7 @@ t_env               *create_env_list(t_env *lenv, char **env);
 char                *take_dollar_name(char *comd, int *k, t_env *envl, int type);
 void                destroy_redirection_list(t_redirection *redirection);
 
-t_command           *ft_parce(t_token_list *token_list, t_env *lenv);
+t_command           *ft_parse(t_token_list *token_list, t_env *lenv);
 void    free_list(t_token_list *var);
 void    ft_new_str(char *str, int index);
 char            *get_dollar_name(char *command,int *j);
