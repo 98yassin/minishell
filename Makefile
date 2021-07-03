@@ -14,7 +14,7 @@ all : $(NAME)
 
 $(NAME): $(OBJ)
 	@make -sC libft
-	@gcc $(CFLAGS) $^ $(libft) -o $(NAME) -lreadline
+	@gcc $(CFLAGS) $^ $(libft) -o $(NAME) -lreadline $(LDFLAGS) -lncurses
 	@echo "\033[1;32m                        _ _          _ \033[0m"
 	@echo "\033[1;32m                       (_) |        | |\033[0m"
 	@echo "\033[1;32m  ____ ___  ____  ____  _| | ____ _ | |\033[0m"
@@ -24,7 +24,7 @@ $(NAME): $(OBJ)
 	@echo "\033[1;32m                 |_|                   \033[0m"
 
 %.o: %.c $(HDRS)
-	@gcc $(CFLAGS) -c $< -o $@
+	@gcc $(CFLAGS) -c $< -o $@ $(CPPFLAGS)
 
 clean:
 	@rm -f $(OBJ)

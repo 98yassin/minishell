@@ -23,6 +23,9 @@
 #include <readline/history.h>
 #include "libft/libft.h"
 
+#include <curses.h>
+#include <term.h>
+
 #define GREEN "\e[1;32m"
 #define RESET "\e[0m"
 #define RED "\e[1;91m"

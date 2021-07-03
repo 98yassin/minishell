@@ -69,6 +69,18 @@ void    destroy_list_cmd(t_command *cmd)
     free(curr_cmd);
 }
 
+void	signal_handler(int sig_num)
+{
+	if (sig_num == SIGINT)
+	{
+		(void)sig_num;
+		printf("\n");
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
+}
+
 int     main(int argc, char **argv, char **env)
 {
     t_token_list *var;
@@ -86,7 +98,12 @@ int     main(int argc, char **argv, char **env)
     lenv = create_env_list(lenv, env);
     while (1)
     {
+		signal(SIGINT, signal_handler);
+		signal(SIGQUIT, SIG_IGN);
+		
 		line = readline("My_Minishell $ ");
+		if (line == NULL)
+			exit(0);
 		add_history(line);
         var = ft_lexer(line);
         display_token(var);

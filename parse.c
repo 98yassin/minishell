@@ -351,6 +351,7 @@ t_command           *ft_parse(t_token_list *token_list, t_env *lenv)
     t_token_list    *first_word;
     char **cmd_arg;
     int size;
+	int i;
 
     size = 0;
     current_token = token_list;
@@ -368,8 +369,13 @@ t_command           *ft_parse(t_token_list *token_list, t_env *lenv)
                 size++;
                 current_token = current_token->next;
             }
-            cmd_arg = (char **)malloc(sizeof(char *) * (size + 1));
-            int i = 0;
+            if (cmd_arg == NULL)
+			{
+				cmd_arg = (char **)malloc(sizeof(char *) * (size + 1));
+				i = 0;
+			}
+			size = i + size;
+            
             while (i < size)
             {
                 cmd_arg[i] = ft_strdup(first_word->value);
